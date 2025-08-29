@@ -1,0 +1,24 @@
+Screen {
+    background: rgba(248, 246, 133, 1);
+}
+
+ListView {
+    margin: 2;
+    background: rgba(138, 155, 61, 1);
+    width: 30;
+    height: 40;
+}
+
+ListItem {
+    margin-top: 1;
+    color: black;
+}
+
+Button {
+    margin: 2;
+}
+
+Input {
+    width: 60%;
+    margin: 2;
+}

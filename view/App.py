@@ -21,6 +21,7 @@ class GerenciadorApp(App):
     arquivo_antes = ""
     montou = False
     etiqueta_selecionada = ""
+    pasta = ""
 
     def compose(self):
         with HorizontalGroup():
@@ -73,6 +74,7 @@ class GerenciadorApp(App):
                                 if conteudo in arquivos_pasta:
                                     list_item.remove()
                             self.montou = False
+                            self.pasta = ""
                             self.contador = 0
                         else:
                             for i, arquivo in enumerate(arquivos_pasta):
@@ -80,10 +82,15 @@ class GerenciadorApp(App):
                                 lista_view.insert(
                                     index_static+i, [ListItem(Static(f"   -> {arquivo}"), name=arquivo)])
                             self.montou = True
+                            self.pasta = static[:-1]
                             self.contador = 0
                     else:
-                        os.startfile(caminho_arquivo)
-                        self.contador = 0
+                        if "->" in static:
+                            os.startfile(f"{self.caminho}\\{self.pasta}\\{static[6:]}")
+                            self.contador = 0
+                        else:
+                            os.startfile(caminho_arquivo)
+                            self.contador = 0
             else:
                 if self.contador == 0:
                     self.contador += 1

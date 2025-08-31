@@ -5,20 +5,36 @@ Screen {
 ListView {
     margin: 2;
     background: rgba(138, 155, 61, 1);
-    width: 30;
-    height: 40;
+    width: auto;
+    height: auto;
 }
 
 ListItem {
-    margin-top: 1;
+    margin: 1 0 0 1;
     color: black;
 }
 
 Button {
-    margin: 2;
+    width: auto;
+    height: auto;
+    margin: 2 0 0 0;
 }
 
 Input {
-    width: 60%;
-    margin: 2;
+    width: 90%;
+    height: auto;
+    margin: 2 0 0 0;
+}
+
+#lst_etiqueta {
+    margin: 2 2 0 0;
+    width: 30%;
+}
+
+#lst_item {
+    width: 40%;
+}
+
+#vg_inputs {
+    width: 44%;
 }

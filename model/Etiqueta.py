@@ -8,6 +8,8 @@ class Etiqueta:
     def add_arquivo(self, arquivo):
         if arquivo not in self.arquivos:
             self.arquivos.append(arquivo)
+            return True
+        return False
         
     def get_nome(self):
         return self.nome

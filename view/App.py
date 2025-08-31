@@ -53,7 +53,7 @@ class GerenciadorApp(App):
 
     def on_click(self, evento: Click):
         if isinstance(evento.widget, Static):
-            static = evento.widget._content
+            static = evento.widget.content
             if static == self.arquivo_antes:
                 if self.contador != 2:
                     self.contador += 1
@@ -63,13 +63,13 @@ class GerenciadorApp(App):
                         arquivos_pasta = os.listdir(caminho_arquivo[:-1])
                         lista_view = self.query_one(ListView)
                         for list_item in lista_view.children:
-                            if list_item.get_child_by_type(Static)._content == static:
+                            if list_item.get_child_by_type(Static).content == static:
                                 index_static = lista_view.children.index(
                                     list_item)
                         if self.montou:
                             for list_item in lista_view.children:
                                 conteudo = list_item.get_child_by_type(
-                                    Static)._content
+                                    Static).content
                                 conteudo = conteudo[6:]
                                 if conteudo in arquivos_pasta:
                                     list_item.remove()
@@ -86,7 +86,8 @@ class GerenciadorApp(App):
                             self.contador = 0
                     else:
                         if "->" in static:
-                            os.startfile(f"{self.caminho}\\{self.pasta}\\{static[6:]}")
+                            os.startfile(
+                                f"{self.caminho}\\{self.pasta}\\{static[6:]}")
                             self.contador = 0
                         else:
                             os.startfile(caminho_arquivo)
@@ -176,13 +177,13 @@ class GerenciadorApp(App):
         match evento.list_view.id:
             case "lst_item":
                 try:
-                    arquivo = evento.item.get_child_by_type(Static)._content
+                    arquivo = evento.item.get_child_by_type(Static).content
                     self.arquivo_selecionado = arquivo
                 except:
                     pass
             case "lst_etiqueta":
                 try:
-                    etiqueta = evento.item.get_child_by_type(Static)._content
+                    etiqueta = evento.item.get_child_by_type(Static).content
                     self.etiqueta_selecionada = etiqueta
                 except:
                     pass
@@ -219,7 +220,7 @@ class GerenciadorApp(App):
                     if cadastro:
                         self.etiquetas[nome] = etiqueta
                         for static in self.query(Static):
-                            if static._content == self.arquivo_selecionado and cor != "":
+                            if static.content == self.arquivo_selecionado and cor != "":
                                 static.styles.color = cor
                         self.notify("Arquivo etiquetado")
                     else:
@@ -229,7 +230,7 @@ class GerenciadorApp(App):
                     cadastro = etiqueta.add_arquivo(self.arquivo_selecionado)
                     if cadastro:
                         for static in self.query(Static):
-                            if static._content == self.arquivo_selecionado and cor != "":
+                            if static.content == self.arquivo_selecionado and cor != "":
                                 static.styles.color = cor
                         self.notify("Arquivo etiquetado")
                     else:

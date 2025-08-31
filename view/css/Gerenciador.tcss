@@ -17,17 +17,17 @@ ListItem {
 Button {
     width: auto;
     height: auto;
-    margin: 2 0 0 0;
+    margin: 2;
 }
 
 Input {
     width: 90%;
     height: auto;
-    margin: 2 0 0 0;
+    margin: 2;
 }
 
 #lst_etiqueta {
-    margin: 2 2 0 0;
+    margin: 2 2;
     width: 30%;
 }
 
@@ -37,4 +37,8 @@ Input {
 
 #vg_inputs {
     width: 44%;
+}
+
+Select {
+    margin: 2;
 }

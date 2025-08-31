@@ -1,5 +1,5 @@
 from textual.app import App
-from textual.widgets import ListItem, ListView, Static, Button, Input
+from textual.widgets import ListItem, ListView, Static, Button, Input, Select
 from textual.containers import HorizontalGroup, VerticalGroup
 from textual.events import Click
 from textual import on
@@ -32,24 +32,10 @@ class GerenciadorApp(App):
                     yield Input(placeholder="Nome da etiqueta", id="nome")
                     yield Input(placeholder="Cor da etiqueta", id="cor")
                 with VerticalGroup():
+                    yield Select([("Cadastrar", "Cadastrar"), ("Editar", "Editar"), ("Remover", "Remover")])
+                    yield Button("Executar", id="bt_executar")
                     yield Button("Limpar", id="bt_limpar")
-                    yield Button("Editar", id="bt_editar")
-                    yield Button("Adicionar", id="bt_adicionar")
                 yield ListView(id="lst_etiqueta")
-
-    # def compose(self):
-    #     with HorizontalGroup():
-    #         yield ListView(id="lst_etiqueta")
-    #         with VerticalGroup():
-    #                 with HorizontalGroup():
-    #                     with VerticalGroup():
-    #                         yield Input(placeholder="Pesquise aqui", id="pesquisa")
-    #                         yield Input(placeholder="Nome da etiqueta", id="nome")
-    #                         yield Input(placeholder="Cor da etiqueta", id="cor")
-    #                     with VerticalGroup():
-    #                         yield Button("Limpar")
-    #                         yield Button("Adicionar")
-    #                 yield ListView(id="lst_item")
 
     def on_click(self, evento: Click):
         if isinstance(evento.widget, Static):
@@ -114,7 +100,10 @@ class GerenciadorApp(App):
                 arquivo_stt = Static(arquivo)
                 for etiqueta_obj in self.etiquetas.values():
                     if arquivo in etiqueta_obj.arquivos and etiqueta_obj.get_cor():
-                        arquivo_stt.styles.color = etiqueta_obj.get_cor()
+                        try:
+                            arquivo_stt.styles.color = etiqueta_obj.get_cor()
+                        except:
+                            pass
                         break
                 list_view.append(ListItem(arquivo_stt))
         else:
@@ -158,7 +147,10 @@ class GerenciadorApp(App):
                 arquivo_stt = Static(arquivo)
                 for etiqueta_obj in self.etiquetas.values():
                     if arquivo in etiqueta_obj.arquivos and etiqueta_obj.get_cor():
-                        arquivo_stt.styles.color = etiqueta_obj.get_cor()
+                        try:
+                            arquivo_stt.styles.color = etiqueta_obj.get_cor()
+                        except:
+                            pass
                         break
                 list_view.append(ListItem(arquivo_stt))
 
@@ -167,7 +159,10 @@ class GerenciadorApp(App):
                 arquivo_stt = Static(arquivo)
                 for etiqueta_obj in self.etiquetas.values():
                     if arquivo in etiqueta_obj.arquivos and etiqueta_obj.get_cor():
-                        arquivo_stt.styles.color = etiqueta_obj.get_cor()
+                        try:
+                            arquivo_stt.styles.color = etiqueta_obj.get_cor()
+                        except:
+                            pass
                         break
                 item = ListItem(arquivo_stt)
                 list_view.append(item)
@@ -194,46 +189,72 @@ class GerenciadorApp(App):
                 for input in self.query(Input):
                     input.value = ""
 
-            case "bt_editar":
-                nome = self.etiqueta_selecionada
-                novo_nome = self.query_one("#nome", Input).value
-                cor = self.query_one("#cor", Input).value
-                etiqueta = self.etiquetas[nome]
-                if novo_nome and cor:
-                    etiqueta.set_nome(novo_nome)
-                    etiqueta.set_cor(cor)
-                elif cor:
-                    etiqueta.set_cor(cor)
-                elif novo_nome:
-                    etiqueta.set_nome(novo_nome)
-                self.carregar_etiquetas()
-                self.atualizar()
-                Cofre.salvar("Etiquetas.db", "etiquetas", self.etiquetas)
+            case "bt_executar":
+                select = self.query_one(Select)
+                match select.value:
+                    case "Cadastrar":
+                        nome = self.query_one("#nome", Input).value
+                        cor = self.query_one("#cor", Input).value
 
-            case "bt_adicionar":
-                nome = self.query_one("#nome", Input).value
-                cor = self.query_one("#cor", Input).value
+                        if nome not in self.etiquetas.keys():
+                            etiqueta = Etiqueta(nome, cor)
+                            cadastro = etiqueta.add_arquivo(
+                                self.arquivo_selecionado)
+                            if cadastro:
+                                self.etiquetas[nome] = etiqueta
+                                for static in self.query(Static):
+                                    if static.content == self.arquivo_selecionado and cor != "":
+                                        try:
+                                            static.styles.color = cor
+                                        except:
+                                            self.notify(
+                                                f"ERRO. '{cor}' inválida")
+                                self.notify("Arquivo etiquetado")
+                            else:
+                                self.notify("Arquivo já cadastrado")
+                        else:
+                            etiqueta = self.etiquetas[nome]
+                            cadastro = etiqueta.add_arquivo(
+                                self.arquivo_selecionado)
+                            if cadastro:
+                                for static in self.query(Static):
+                                    if static.content == self.arquivo_selecionado and cor != "":
+                                        try:
+                                            static.styles.color = cor
+                                        except:
+                                            self.notify(
+                                                f"ERRO. '{cor}' inválida")
+                                self.notify("Arquivo etiquetado")
+                            else:
+                                self.notify("Arquivo já cadastrado")
+                        self.carregar_etiquetas()
+                        Cofre.salvar("Etiquetas.db",
+                                     "etiquetas", self.etiquetas)
 
-                if nome not in self.etiquetas.keys():
-                    etiqueta = Etiqueta(nome, cor)
-                    cadastro = etiqueta.add_arquivo(self.arquivo_selecionado)
-                    if cadastro:
-                        self.etiquetas[nome] = etiqueta
-                        for static in self.query(Static):
-                            if static.content == self.arquivo_selecionado and cor != "":
-                                static.styles.color = cor
-                        self.notify("Arquivo etiquetado")
-                    else:
-                        self.notify("Arquivo já cadastrado")
-                else:
-                    etiqueta = self.etiquetas[nome]
-                    cadastro = etiqueta.add_arquivo(self.arquivo_selecionado)
-                    if cadastro:
-                        for static in self.query(Static):
-                            if static.content == self.arquivo_selecionado and cor != "":
-                                static.styles.color = cor
-                        self.notify("Arquivo etiquetado")
-                    else:
-                        self.notify("Arquivo já cadastrado")
-                self.carregar_etiquetas()
-                Cofre.salvar("Etiquetas.db", "etiquetas", self.etiquetas)
+                    case "Editar":
+                        nome = self.etiqueta_selecionada
+                        novo_nome = self.query_one("#nome", Input).value
+                        cor = self.query_one("#cor", Input).value
+                        etiqueta = self.etiquetas[nome]
+                        if novo_nome and cor:
+                            etiqueta.set_nome(novo_nome)
+                            etiqueta.set_cor(cor)
+                        elif cor:
+                            etiqueta.set_cor(cor)
+                        elif novo_nome:
+                            etiqueta.set_nome(novo_nome)
+                        self.carregar_etiquetas()
+                        self.atualizar()
+                        Cofre.salvar("Etiquetas.db",
+                                     "etiquetas", self.etiquetas)
+
+                    case "Remover":
+                        del self.etiquetas[self.etiqueta_selecionada]
+                        self.notify("Etiqueta Removida com sucesso")
+                        self.carregar_etiquetas()
+                        self.atualizar()
+                        Cofre.salvar("Etiquetas.db",
+                                     "etiquetas", self.etiquetas)
+
+                    case _:
+                        self.notify("Selecione uma operação")

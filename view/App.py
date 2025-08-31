@@ -11,7 +11,7 @@ from model import Cofre
 class GerenciadorApp(App):
     CSS_PATH = "css/Gerenciador.tcss"
 
-    caminho = f"{os.path.expanduser("~")}\\Downloads"
+    caminho = f"{os.path.expanduser('~')}\\Downloads"
 
     lista_arquivos = os.listdir(caminho)
     arquivos_filtrados = []

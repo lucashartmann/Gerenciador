@@ -38,52 +38,53 @@ class GerenciadorApp(App):
                 yield ListView(id="lst_etiqueta")
 
     def on_click(self, evento: Click):
-        if isinstance(evento.widget, Static):
-            static = evento.widget.content
-            if static == self.arquivo_antes:
-                if self.contador != 2:
-                    self.contador += 1
-                if self.contador == 2:
-                    caminho_arquivo = self.caminho + f"\\{static}"
-                    if "." not in static:
-                        arquivos_pasta = os.listdir(caminho_arquivo[:-1])
-                        lista_view = self.query_one(ListView)
-                        for list_item in lista_view.children:
-                            if list_item.get_child_by_type(Static).content == static:
-                                index_static = lista_view.children.index(
-                                    list_item)
-                        if self.montou:
+        if evento.widget.parent.parent.id == "lst_item":
+            if isinstance(evento.widget, Static):
+                static = evento.widget.content
+                if static == self.arquivo_antes:
+                    if self.contador != 2:
+                        self.contador += 1
+                    if self.contador == 2:
+                        caminho_arquivo = self.caminho + f"\\{static}"
+                        if "." not in static:
+                            arquivos_pasta = os.listdir(caminho_arquivo[:-1])
+                            lista_view = self.query_one(ListView)
                             for list_item in lista_view.children:
-                                conteudo = list_item.get_child_by_type(
-                                    Static).content
-                                conteudo = conteudo[6:]
-                                if conteudo in arquivos_pasta:
-                                    list_item.remove()
-                            self.montou = False
-                            self.pasta = ""
-                            self.contador = 0
+                                if list_item.get_child_by_type(Static).content == static:
+                                    index_static = lista_view.children.index(
+                                        list_item)
+                            if self.montou:
+                                for list_item in lista_view.children:
+                                    conteudo = list_item.get_child_by_type(
+                                        Static).content
+                                    conteudo = conteudo[6:]
+                                    if conteudo in arquivos_pasta:
+                                        list_item.remove()
+                                self.montou = False
+                                self.pasta = ""
+                                self.contador = 0
+                            else:
+                                for i, arquivo in enumerate(arquivos_pasta):
+                                    i += 1
+                                    lista_view.insert(
+                                        index_static+i, [ListItem(Static(f"   -> {arquivo}"), name=arquivo)])
+                                self.montou = True
+                                self.pasta = static[:-1]
+                                self.contador = 0
                         else:
-                            for i, arquivo in enumerate(arquivos_pasta):
-                                i += 1
-                                lista_view.insert(
-                                    index_static+i, [ListItem(Static(f"   -> {arquivo}"), name=arquivo)])
-                            self.montou = True
-                            self.pasta = static[:-1]
-                            self.contador = 0
-                    else:
-                        if "->" in static:
-                            os.startfile(
-                                f"{self.caminho}\\{self.pasta}\\{static[6:]}")
-                            self.contador = 0
-                        else:
-                            os.startfile(caminho_arquivo)
-                            self.contador = 0
-            else:
-                if self.contador == 0:
-                    self.contador += 1
+                            if "->" in static:
+                                os.startfile(
+                                    f"{self.caminho}\\{self.pasta}\\{static[6:]}")
+                                self.contador = 0
+                            else:
+                                os.startfile(caminho_arquivo)
+                                self.contador = 0
                 else:
-                    self.contador = 0
-                self.arquivo_antes = static
+                    if self.contador == 0:
+                        self.contador += 1
+                    else:
+                        self.contador = 0
+                    self.arquivo_antes = static
 
     def carregar_arquivos(self):
         carregar = Cofre.carregar("Etiquetas.db", "etiquetas")
@@ -114,11 +115,12 @@ class GerenciadorApp(App):
         lista_view = self.query_one("#lst_etiqueta", ListView)
         for child in lista_view.children:
             child.remove()
-        for etiqueta_obj in self.etiquetas.values():
-            stt = Static(etiqueta_obj.get_nome())
-            stt.styles.color = etiqueta_obj.get_cor()
-            lista_view.append(
-                ListItem(stt))
+        if self.etiquetas:
+            for etiqueta_obj in self.etiquetas.values():
+                stt = Static(etiqueta_obj.get_nome())
+                stt.styles.color = etiqueta_obj.get_cor()
+                lista_view.append(
+                    ListItem(stt))
 
     def on_mount(self):
         self.carregar_arquivos()
@@ -251,7 +253,14 @@ class GerenciadorApp(App):
                     case "Remover":
                         del self.etiquetas[self.etiqueta_selecionada]
                         self.notify("Etiqueta Removida com sucesso")
-                        self.carregar_etiquetas()
+                        if self.etiquetas:
+                            self.carregar_etiquetas()
+                        else:
+                            statico = self.query_one("#lst_item", ListView).query_one(
+                                ListItem).query_one(Static)
+                            if statico.content == self.etiqueta_selecionada:
+                                statico.remove()
+                            self.carregar_etiquetas()
                         self.atualizar()
                         Cofre.salvar("Etiquetas.db",
                                      "etiquetas", self.etiquetas)

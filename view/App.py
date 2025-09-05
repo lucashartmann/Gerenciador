@@ -65,6 +65,10 @@ class GerenciadorApp(App):
                                 self.contador = 0
                             else:
                                 for i, arquivo in enumerate(arquivos_pasta):
+                                    if "." not in arquivo[1:]:
+                                        index_arquivo = arquivos_pasta.index(arquivo)
+                                        arquivo = arquivo + "↓"
+                                        arquivos_pasta[index_arquivo] = arquivo
                                     i += 1
                                     lista_view.insert(
                                         index_static+i, [ListItem(Static(f"   -> {arquivo}"), name=arquivo)])
@@ -72,7 +76,7 @@ class GerenciadorApp(App):
                                 self.pasta = static[:-1]
                                 self.contador = 0
                         else:
-                            if "->" in static:
+                            if "->" in static and "." in static:
                                 os.startfile(
                                     f"{self.caminho}\\{self.pasta}\\{static[6:]}")
                                 self.contador = 0
@@ -237,33 +241,37 @@ class GerenciadorApp(App):
                         nome = self.etiqueta_selecionada
                         novo_nome = self.query_one("#nome", Input).value
                         cor = self.query_one("#cor", Input).value
-                        etiqueta = self.etiquetas[nome]
-                        if novo_nome and cor:
-                            etiqueta.set_nome(novo_nome)
-                            etiqueta.set_cor(cor)
-                        elif cor:
-                            etiqueta.set_cor(cor)
-                        elif novo_nome:
-                            etiqueta.set_nome(novo_nome)
-                        self.carregar_etiquetas()
-                        self.atualizar()
-                        Cofre.salvar("Etiquetas.db",
-                                     "etiquetas", self.etiquetas)
+                        try:
+                            etiqueta = self.etiquetas[nome]
+                            if novo_nome and cor:
+                                etiqueta.set_nome(novo_nome)
+                                etiqueta.set_cor(cor)
+                            elif cor:
+                                etiqueta.set_cor(cor)
+                            elif novo_nome:
+                                etiqueta.set_nome(novo_nome)
+                            self.carregar_etiquetas()
+                            self.atualizar()
+                            Cofre.salvar("Etiquetas.db",
+                                        "etiquetas", self.etiquetas)
+                        except:
+                            self.notify(f"ERRO ao editar! '{self.etiqueta_selecionada}'")
+                        
 
                     case "Remover":
-                        del self.etiquetas[self.etiqueta_selecionada]
-                        self.notify("Etiqueta Removida com sucesso")
-                        if self.etiquetas:
-                            self.carregar_etiquetas()
-                        else:
+                        try:
+                            del self.etiquetas[self.etiqueta_selecionada]
+                            self.notify("Etiqueta Removida com sucesso")
                             statico = self.query_one("#lst_item", ListView).query_one(
                                 ListItem).query_one(Static)
                             if statico.content == self.etiqueta_selecionada:
                                 statico.remove()
                             self.carregar_etiquetas()
-                        self.atualizar()
-                        Cofre.salvar("Etiquetas.db",
-                                     "etiquetas", self.etiquetas)
+                            self.atualizar()
+                            Cofre.salvar("Etiquetas.db",
+                                        "etiquetas", self.etiquetas)
+                        except:
+                            self.notify(f"ERRO ao remover! '{self.etiqueta_selecionada}'")
 
                     case _:
                         self.notify("Selecione uma operação")

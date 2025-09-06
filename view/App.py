@@ -17,11 +17,11 @@ class GerenciadorApp(App):
     arquivos_filtrados = []
     arquivo_selecionado = ""
     etiquetas = dict()
-    contador = 0
     arquivo_antes = ""
-    montou = False
+    expandidas = set()
     etiqueta_selecionada = ""
     pasta = ""
+    contador = 1
 
     def compose(self):
         with HorizontalGroup():
@@ -37,58 +37,104 @@ class GerenciadorApp(App):
                     yield Button("Limpar", id="bt_limpar")
                 yield ListView(id="lst_etiqueta")
 
+    caminho_arquivo = caminho
+
     def on_click(self, evento: Click):
         if evento.widget.parent.parent.id == "lst_item":
             if isinstance(evento.widget, Static):
-                static = evento.widget.content
-                if static == self.arquivo_antes:
-                    if self.contador != 2:
-                        self.contador += 1
-                    if self.contador == 2:
-                        caminho_arquivo = self.caminho + f"\\{static}"
-                        if "." not in static:
-                            arquivos_pasta = os.listdir(caminho_arquivo[:-1])
-                            lista_view = self.query_one(ListView)
-                            for list_item in lista_view.children:
-                                if list_item.get_child_by_type(Static).content == static:
-                                    index_static = lista_view.children.index(
-                                        list_item)
-                            if self.montou:
-                                for list_item in lista_view.children:
-                                    conteudo = list_item.get_child_by_type(
-                                        Static).content
-                                    conteudo = conteudo[6:]
-                                    if conteudo in arquivos_pasta:
-                                        list_item.remove()
-                                self.montou = False
-                                self.pasta = ""
-                                self.contador = 0
-                            else:
+                static_clicado = evento.widget.content  # Static que recebeu o clique
+                if static_clicado == self.arquivo_antes and evento.chain == 2:  # Verifica se o static recebeu clique duplo
+
+                    lista_view = self.query_one(ListView)
+
+                    if "." not in static_clicado:  # Verifica se é uma pasta
+
+                        if "->" not in static_clicado and static_clicado[:-1] not in self.caminho_arquivo.split("\\"):
+                            # Caminho da pasta clicada, [:1] remove a seta ↓
+                            self.notify("Lucas")
+                            self.caminho_arquivo += \
+                                f"\\{static_clicado[:-1]}"
+
+                        self.notify(str(self.caminho_arquivo.split("\\")))
+                        if "->" in static_clicado:  # Verifica se é uma pasta dentro de outra pasta
+                            self.contador += 1
+                            statics = []
+
+                            for list_item in lista_view.children:  # Varre a lista de ListItem da ListView
+
+                                statics.append(
+                                    # Adiciona o conteúdo do Static de cada ListItem na lista statics
+                                    list_item.get_child_by_type(Static).content)
+
+                            if static_clicado[(self.contador+2):-1] not in self.caminho_arquivo.split("\\"):
+                                self.caminho_arquivo += \
+                                    f"\\{static_clicado[(self.contador+2):-1]}"  # Caminho da pasta clicada dentro da pasta raiz
+
+                        arquivos_pasta = os.listdir(
+                            self.caminho_arquivo)
+
+                        self.notify(self.caminho_arquivo)
+
+                        for arquivo in arquivos_pasta:  # Varre os arquivos da pasta clicada
+                            # Substitui o nome do arquivo na lista por ele mesmo + seta (↓) se for uma pasta
+                            if "." not in arquivo[1:]:
+                                index_arquivo = arquivos_pasta.index(
+                                    arquivo)
+                                arquivo = arquivo + "↓"
+                                arquivos_pasta[index_arquivo] = arquivo
+
+                        for list_item in lista_view.children:  # Varre a lista de ListItem da ListView
+
+                            if list_item.get_child_by_type(Static).content == static_clicado:
+                                index_static = lista_view.children.index(
+                                    list_item)  # Pega o index do ListItem que contém o Static clicado
+
+                        # Verifica se a pasta já está expandida
+                        if "->" in static_clicado and static_clicado[static_clicado.index("->"):-1] in self.expandidas or "↓" in static_clicado and static_clicado[:-1] in self.expandidas:
+
+                            for list_item in lista_view.children:  # Varre a lista de ListItem da ListView
+                                conteudo = list_item.get_child_by_type(
+                                    Static).content
+                                self.notify(str(arquivos_pasta))
+
+                                # Remove "->"
+                                conteudo = conteudo[self.contador+3:]
+
+                                if conteudo in arquivos_pasta:
+                                    list_item.remove()
+
+                            if "->" in static_clicado:
+                                index = static_clicado.index("->")
+                                self.expandidas.remove(
+                                    static_clicado[index:-1])
+                            if "↓" in static_clicado:
+                                self.expandidas.remove(static_clicado[:-1])
+
+                            if self.contador > 1:
+                                self.contador -= 1
+
+                        else:
+                            if "->" in static_clicado and static_clicado[static_clicado.index("->"):-1] not in self.expandidas or "↓" in static_clicado and static_clicado[:-1] not in self.expandidas:
                                 for i, arquivo in enumerate(arquivos_pasta):
-                                    if "." not in arquivo[1:]:
-                                        index_arquivo = arquivos_pasta.index(arquivo)
-                                        arquivo = arquivo + "↓"
-                                        arquivos_pasta[index_arquivo] = arquivo
                                     i += 1
                                     lista_view.insert(
-                                        index_static+i, [ListItem(Static(f"   -> {arquivo}"), name=arquivo)])
-                                self.montou = True
-                                self.pasta = static[:-1]
-                                self.contador = 0
-                        else:
-                            if "->" in static and "." in static:
-                                os.startfile(
-                                    f"{self.caminho}\\{self.pasta}\\{static[6:]}")
-                                self.contador = 0
-                            else:
-                                os.startfile(caminho_arquivo)
-                                self.contador = 0
-                else:
-                    if self.contador == 0:
-                        self.contador += 1
+                                        index_static+i, [ListItem(Static(f"{self.contador * ' '}-> {arquivo}"), name=arquivo)])
+
+                                if "->" in static_clicado:
+                                    index = static_clicado.index("->")
+                                    self.expandidas.add(
+                                        static_clicado[index:-1])
+                                if "↓" in static_clicado:
+                                    self.expandidas.add(static_clicado[:-1])
+
                     else:
-                        self.contador = 0
-                    self.arquivo_antes = static
+                        if "->" in static_clicado and "." in static_clicado:
+                            os.startfile(
+                                f"{self.caminho}\\{self.pasta}\\{static_clicado[6:]}")
+                        else:
+                            os.startfile(self.caminho_arquivo)
+                else:
+                    self.arquivo_antes = static_clicado
 
     def carregar_arquivos(self):
         carregar = Cofre.carregar("Etiquetas.db", "etiquetas")
@@ -253,10 +299,10 @@ class GerenciadorApp(App):
                             self.carregar_etiquetas()
                             self.atualizar()
                             Cofre.salvar("Etiquetas.db",
-                                        "etiquetas", self.etiquetas)
+                                         "etiquetas", self.etiquetas)
                         except:
-                            self.notify(f"ERRO ao editar! '{self.etiqueta_selecionada}'")
-                        
+                            self.notify(
+                                f"ERRO ao editar! '{self.etiqueta_selecionada}'")
 
                     case "Remover":
                         try:
@@ -269,9 +315,10 @@ class GerenciadorApp(App):
                             self.carregar_etiquetas()
                             self.atualizar()
                             Cofre.salvar("Etiquetas.db",
-                                        "etiquetas", self.etiquetas)
+                                         "etiquetas", self.etiquetas)
                         except:
-                            self.notify(f"ERRO ao remover! '{self.etiqueta_selecionada}'")
+                            self.notify(
+                                f"ERRO ao remover! '{self.etiqueta_selecionada}'")
 
                     case _:
                         self.notify("Selecione uma operação")

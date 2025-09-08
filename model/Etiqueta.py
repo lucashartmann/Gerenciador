@@ -4,6 +4,7 @@ class Etiqueta:
         self.nome = nome
         self.cor = cor
         self.arquivos = list()
+        self.caminho = ''
         
     def add_arquivo(self, arquivo):
         if arquivo not in self.arquivos:

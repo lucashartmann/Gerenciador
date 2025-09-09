@@ -42,3 +42,8 @@ Input {
 Select {
     margin: 2;
 }
+
+#bt_voltar {
+    background: 0%;
+    color: black;
+}

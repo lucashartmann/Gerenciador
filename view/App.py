@@ -1,6 +1,6 @@
 from textual.app import App
 from textual.widgets import ListItem, ListView, Static, Button, Input, Select
-from textual.containers import HorizontalGroup, VerticalGroup
+from textual.containers import HorizontalGroup, VerticalGroup, Container
 from textual.events import Click
 from textual import on
 import os
@@ -15,15 +15,19 @@ class GerenciadorApp(App):
 
     lista_arquivos = os.listdir(caminho)
     arquivos_filtrados = []
+    caminhos = list()
     arquivo_selecionado = ""
     etiquetas = dict()
     etiqueta_selecionada = ""
-
-    caminhos = list()
+    static_antigo = ''
+    caminho_arquivo = caminho
+    static_clicado = ""
 
     def compose(self):
         with HorizontalGroup():
-            yield ListView(id="lst_item")
+            with Container(id="ct_lista_items"):
+                self.mount(Button("<-", id="bt_voltar"))
+                yield ListView(id="lst_item")
             with HorizontalGroup():
                 with VerticalGroup(id="vg_inputs"):
                     yield Input(placeholder="Pesquise aqui", id="pesquisa")
@@ -35,28 +39,29 @@ class GerenciadorApp(App):
                     yield Button("Limpar", id="bt_limpar")
                 yield ListView(id="lst_etiqueta")
 
-    caminho_arquivo = caminho
-
     def on_click(self, evento: Click):
         if evento.widget.parent.parent.id == "lst_item":
             if isinstance(evento.widget, Static):
-                static_clicado = evento.widget.content
+                self.static_clicado = evento.widget.content
                 if evento.chain == 2:
-                    if "." not in static_clicado:
+                    if "." not in self.static_clicado:
                         self.caminhos.append(self.caminho)
                         caminho_pasta = self.caminho + \
-                            f"\\{static_clicado[:-1]}"
-                        arquivos_pasta = os.listdir(caminho_pasta)
-                        self.caminho = arquivos_pasta
-                        self.caminhos.append(arquivos_pasta)
-                        self.carregar_arquivos()
+                            f"\\{self.static_clicado[:-1]}"
+                        self.caminho = caminho_pasta
+                        self.caminhos.append(caminho_pasta)
+                        self.static_antigo = self.static_clicado
+                    self.carregar_arquivos()
                 else:
-                    os.startfile(self.caminho_arquivo)
+                    os.startfile(self.caminho_arquivo)      
 
     def carregar_arquivos(self):
+        list_view = self.query_one("#lst_item", ListView)
+        for child in list_view.children:
+            child.remove()
         self.lista_arquivos = os.listdir(self.caminho)
         carregar = Cofre.carregar("Etiquetas.db", "etiquetas")
-        list_view = self.query_one("#lst_item", ListView)
+
         for arquivo in self.lista_arquivos:
             if "." not in arquivo:
                 index_arquivo = self.lista_arquivos.index(arquivo)
@@ -155,6 +160,14 @@ class GerenciadorApp(App):
 
     def on_button_pressed(self, evento: Button.Pressed):
         match evento.button.id:
+            case "bt_voltar":
+                if self.static_clicado == self.static_antigo:
+                    self.caminhos.pop()
+                    self.caminho = self.caminhos[-1]
+                    self.carregar_arquivos()
+                else:
+                    self.notify("Sem pasta raiz")
+                    
             case "bt_limpar":
                 for input in self.query(Input):
                     input.value = ""
@@ -167,7 +180,7 @@ class GerenciadorApp(App):
                         cor = self.query_one("#cor", Input).value
 
                         if nome not in self.etiquetas.keys():
-                            etiqueta = Etiqueta(nome, cor)
+                            etiqueta = Etiqueta(nome, cor, self.caminho)
                             cadastro = etiqueta.add_arquivo(
                                 self.arquivo_selecionado)
                             if cadastro:

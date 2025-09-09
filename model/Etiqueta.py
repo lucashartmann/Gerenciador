@@ -1,10 +1,10 @@
 class Etiqueta:
     
-    def __init__(self, nome, cor):
+    def __init__(self, nome, cor, caminho):
         self.nome = nome
         self.cor = cor
         self.arquivos = list()
-        self.caminho = ''
+        self.caminho = caminho
         
     def add_arquivo(self, arquivo):
         if arquivo not in self.arquivos:

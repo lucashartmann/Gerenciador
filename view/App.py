@@ -18,6 +18,7 @@ class GerenciadorApp(App):
     caminhos = list()
     arquivo_selecionado = ""
     etiquetas = dict()
+    caminhos_etiquetas = dict()
     etiqueta_selecionada = ""
     static_antigo = ''
     caminho_arquivo = caminho
@@ -53,14 +54,23 @@ class GerenciadorApp(App):
                         self.static_antigo = self.static_clicado
                     self.carregar_arquivos()
                 else:
-                    os.startfile(self.caminho_arquivo)      
+                    os.startfile(self.caminho_arquivo)
 
     def carregar_arquivos(self):
         list_view = self.query_one("#lst_item", ListView)
         for child in list_view.children:
             child.remove()
         self.lista_arquivos = os.listdir(self.caminho)
-        carregar = Cofre.carregar("Etiquetas.db", "etiquetas")
+        carregar_etiquetas = Cofre.carregar("Etiquetas.db", "etiquetas")
+        carregar_caminhos = Cofre.carregar("Etiquetas.db",
+                                           "caminhos",)
+        carregar_caminhos_etiquetas = Cofre.carregar("Etiquetas.db",
+                                                     "caminhos_etiquetas", )
+
+        if carregar_caminhos:
+            self.caminhos = carregar_caminhos
+        if carregar_caminhos_etiquetas:
+            self.caminhos_etiquetas = carregar_caminhos_etiquetas
 
         for arquivo in self.lista_arquivos:
             if "." not in arquivo:
@@ -68,8 +78,8 @@ class GerenciadorApp(App):
                 arquivo = arquivo + "↓"
                 self.lista_arquivos[index_arquivo] = arquivo
 
-        if carregar:
-            self.etiquetas = carregar
+        if carregar_etiquetas:
+            self.etiquetas = carregar_etiquetas
             for arquivo in self.lista_arquivos:
                 arquivo_stt = Static(arquivo)
                 for etiqueta_obj in self.etiquetas.values():
@@ -167,7 +177,7 @@ class GerenciadorApp(App):
                     self.carregar_arquivos()
                 else:
                     self.notify("Sem pasta raiz")
-                    
+
             case "bt_limpar":
                 for input in self.query(Input):
                     input.value = ""
@@ -185,6 +195,7 @@ class GerenciadorApp(App):
                                 self.arquivo_selecionado)
                             if cadastro:
                                 self.etiquetas[nome] = etiqueta
+                                self.caminhos_etiquetas[self.caminho] = self.etiquetas
                                 for static in self.query(Static):
                                     if static.content == self.arquivo_selecionado and cor != "":
                                         try:
@@ -197,6 +208,7 @@ class GerenciadorApp(App):
                                 self.notify("Arquivo já cadastrado")
                         else:
                             etiqueta = self.etiquetas[nome]
+                            # self.caminhos_etiquetas[self.caminho] = self.etiquetas[nome]
                             cadastro = etiqueta.add_arquivo(
                                 self.arquivo_selecionado)
                             if cadastro:
@@ -213,6 +225,10 @@ class GerenciadorApp(App):
                         self.carregar_etiquetas()
                         Cofre.salvar("Etiquetas.db",
                                      "etiquetas", self.etiquetas)
+                        Cofre.salvar("Etiquetas.db",
+                                     "caminhos", self.caminhos)
+                        Cofre.salvar("Etiquetas.db",
+                                     "caminhos_etiquetas", self.caminhos_etiquetas)
 
                     case "Editar":
                         nome = self.etiqueta_selecionada
@@ -231,6 +247,10 @@ class GerenciadorApp(App):
                             self.atualizar()
                             Cofre.salvar("Etiquetas.db",
                                          "etiquetas", self.etiquetas)
+                            Cofre.salvar("Etiquetas.db",
+                                         "caminhos", self.caminhos)
+                            Cofre.salvar("Etiquetas.db",
+                                         "caminhos_etiquetas", self.caminhos_etiquetas)
                         except:
                             self.notify(
                                 f"ERRO ao editar! '{self.etiqueta_selecionada}'")
@@ -247,6 +267,10 @@ class GerenciadorApp(App):
                             self.atualizar()
                             Cofre.salvar("Etiquetas.db",
                                          "etiquetas", self.etiquetas)
+                            Cofre.salvar("Etiquetas.db",
+                                         "caminhos", self.caminhos)
+                            Cofre.salvar("Etiquetas.db",
+                                         "caminhos_etiquetas", self.caminhos_etiquetas)
                         except:
                             self.notify(
                                 f"ERRO ao remover! '{self.etiqueta_selecionada}'")

@@ -4,7 +4,7 @@ Screen {
 
 ListView {
     margin: 2;
-    background: rgba(138, 155, 61, 1);
+    background: hsla(71, 44%, 42%, 1.00);
     width: auto;
     height: auto;
 }
@@ -28,11 +28,12 @@ Input {
 
 #lst_etiqueta {
     margin: 2 2;
-    width: 30%;
 }
 
 #lst_item {
-    width: 40%;
+    width: auto;
+    height: auto;
+
 }
 
 #vg_inputs {

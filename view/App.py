@@ -1,6 +1,6 @@
 from textual.app import App
 from textual.widgets import ListItem, ListView, Static, Button, Input, Select
-from textual.containers import HorizontalGroup, VerticalGroup, Container
+from textual.containers import HorizontalGroup, VerticalGroup
 from textual.events import Click
 from textual import on
 import os
@@ -26,19 +26,18 @@ class GerenciadorApp(App):
 
     def compose(self):
         with HorizontalGroup():
-            with Container(id="ct_lista_items"):
-                self.mount(Button("<-", id="bt_voltar"))
+            with VerticalGroup():
+                yield (Button("<-", id="bt_voltar"))
                 yield ListView(id="lst_item")
-            with HorizontalGroup():
-                with VerticalGroup(id="vg_inputs"):
-                    yield Input(placeholder="Pesquise aqui", id="pesquisa")
-                    yield Input(placeholder="Nome da etiqueta", id="nome")
-                    yield Input(placeholder="Cor da etiqueta", id="cor")
-                with VerticalGroup():
-                    yield Select([("Cadastrar", "Cadastrar"), ("Editar", "Editar"), ("Remover", "Remover")])
-                    yield Button("Executar", id="bt_executar")
-                    yield Button("Limpar", id="bt_limpar")
-                yield ListView(id="lst_etiqueta")
+            with VerticalGroup(id="vg_inputs"):
+                yield Input(placeholder="Pesquise aqui", id="pesquisa")
+                yield Input(placeholder="Nome da etiqueta", id="nome")
+                yield Input(placeholder="Cor da etiqueta", id="cor")
+            with VerticalGroup():
+                yield Select([("Cadastrar", "Cadastrar"), ("Editar", "Editar"), ("Remover", "Remover")])
+                yield Button("Executar", id="bt_executar")
+                yield Button("Limpar", id="bt_limpar")
+            yield ListView(id="lst_etiqueta")
 
     def on_click(self, evento: Click):
         if evento.widget.parent.parent.id == "lst_item":

@@ -1,17 +1,17 @@
 Screen {
-    background: rgba(248, 246, 133, 1);
+    background: rgba(247, 243, 51, 1);
 }
 
 ListView {
     margin: 2;
-    background: hsla(71, 44%, 42%, 1.00);
+    background: hsla(65, 14%, 17%, 1.00);
     width: auto;
     height: auto;
 }
 
 ListItem {
     margin: 1 0 0 1;
-    color: black;
+    color: white;
 }
 
 Button {
@@ -41,7 +41,8 @@ Input {
 }
 
 Select {
-    margin: 2;
+    width: 35%;
+    margin-top: 2;
 }
 
 #bt_voltar {

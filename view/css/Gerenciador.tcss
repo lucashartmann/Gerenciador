@@ -59,9 +59,9 @@ Button {
 
 #lst_item {
     layout: grid;
-    grid-size: 4;
-    grid-rows: 30%;
-    grid-columns: 25%;
+    grid-size: 5;
+    grid-rows: 37%;
+    grid-columns: 20%;
     margin: 1;
     overflow: scroll scroll;
     align: center middle;
@@ -154,7 +154,7 @@ ColorPicker {
 #lst_item ListItem{
     border: 40% black;
     margin-top: 2;
-    width: 36%;
+    width: 100%;
     margin: 2;
     min-height:100%;
     height: auto;

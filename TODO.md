@@ -1,3 +1,4 @@
-### App
-
-Usar o self.caminhos na hora de carregar as etiquetas
+Mais extensões de video, fotos
+Imagem de documentos
+Imagem para outros arquivos
+melhorar slide para alterar tamanho

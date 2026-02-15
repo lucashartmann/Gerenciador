@@ -1,51 +1,184 @@
 Screen {
-    background: rgba(247, 243, 51, 1);
-}
-
-ListView {
-    margin: 2;
-    background: hsla(65, 14%, 17%, 1.00);
-    width: auto;
-    height: auto;
-}
-
-ListItem {
-    margin: 1 0 0 1;
+    background: rgb(50, 50, 45);
     color: white;
 }
 
+#pesquisa {
+    margin: 0;
+}
+
+#campo_caminho {
+    width: auto;
+    min-width: 50%;
+    margin: 0;
+}
+
 Button {
-    width: auto;
-    height: auto;
-    margin: 2;
+    min-width: 0%;
 }
 
-Input {
-    width: 90%;
-    height: auto;
-    margin: 2;
-}
-
-#lst_etiqueta {
-    margin: 2 2;
-}
-
-#lst_item {
-    width: auto;
-    height: auto;
-
-}
-
-#vg_inputs {
-    width: 44%;
-}
-
-Select {
-    width: 35%;
-    margin-top: 2;
+#nav-bar {
+    width: 100%;
+    background: black;
+    dock: top;
+    margin-bottom: 0;
 }
 
 #bt_voltar {
-    background: 0%;
-    color: black;
+    width: 3%;
+    background: transparent;
+}
+
+#bt_voltar:hover {
+    background: rgb(72, 72, 66);
+}
+
+#menu_etiquetas {
+    width: 15%;
+    background: rgb(72, 72, 66);
+    height: 100%;
+    content-align: center middle;
+    overflow-y: scroll;
+}
+
+#menu_etiquetas Input:first-child {
+    margin-top: 2;
+}
+
+#menu_etiquetas Widget {
+    margin-top: 1;
+}
+
+#menu_etiquetas Select Widget {
+    margin-top: 0;
+}
+
+#menu_etiquetas Button{
+    width: 90%;
+}
+
+#lst_item {
+    layout: grid;
+    grid-size: 4;
+    grid-rows: 30%;
+    grid-columns: 25%;
+    margin: 1;
+    overflow: scroll scroll;
+    align: center middle;
+    & > ListItem.-highlight {
+                color: $block-cursor-foreground;
+                background: orange;
+                text-style: $block-cursor-text-style;
+            }
+}
+
+#menu_etiquetas #center_color {
+    height: 44%;
+    width: 100%;
+    content-align: center middle;
+}
+
+ColorPicker {
+    height: 100%;
+    width: 90%;
+    layout: vertical;
+
+    VerticalGroup {
+        width: 100%;
+        height: 12%;
+        margin: 0;
+        align: center middle;
+        content-align: center middle;
+    }
+
+    VerticalGroup:first-child {
+        width: 100%;
+        height: 100%;
+        height: auto;
+        margin: 0;
+        padding: 0;
+    }
+
+    SaturationValuePicker {
+            height: 10;
+            width: 100%;
+            margin: 0;
+            align: center middle;
+            content-align: center middle;
+    }
+
+    HuePicker {
+            width: 100%;
+            margin-top: 0;
+            margin: 0;
+            align: center middle;
+            content-align: center middle;
+    }
+
+    ColorPreview {
+            height: 17;
+            width: 20;
+            display: block;
+            margin: 0;
+            align: center middle;
+            content-align: center middle;
+    }
+
+    ColorInputs {
+            display: none;
+            margin: 0;
+    }
+
+}
+
+#lst_item ListItem Center{
+    height: 99%;
+    width: 100%;
+}
+
+#lst_item ListItem Image{
+    height: 100%;
+    width: 100%;
+}
+
+#lst_item ListItem Static{
+    content-align: center middle;
+    text-align: center;
+    dock: bottom;
+}
+
+#menu_etiquetas #stt_arquivo_selecionado, #stt_etiquetas {
+    margin: 2 0 2 1;
+}
+
+#lst_item ListItem{
+    border: 40% black;
+    margin-top: 2;
+    width: 36%;
+    margin: 2;
+    min-height:100%;
+    height: auto;
+    content-align: center middle;
+}
+
+Slider {
+    width: 99%;
+    height: 3%;
+}
+
+#lst_etiqueta {
+    width: 100%;
+    height: auto;
+}
+
+#lst_etiqueta ListItem {
+    width: 100%;
+    height: auto;
+    margin: 0;
+}
+
+#lst_etiqueta ListItem Static {
+    width: auto;
+    height: auto;
+    margin: 0 0 0 1;
 }

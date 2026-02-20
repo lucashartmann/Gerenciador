@@ -138,7 +138,7 @@ ColorPicker {
 
 #lst_item ListItem Image{
     height: 100%;
-    width: 100%;
+    width: 80%;
 }
 
 #lst_item ListItem Static{

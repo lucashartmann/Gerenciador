@@ -2,3 +2,5 @@ textual
 textual-image
 av
 textual-colorpicker
+pywin32 
+pillow

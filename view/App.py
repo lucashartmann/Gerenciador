@@ -16,6 +16,12 @@ from textual_image.widget import SixelImage, HalfcellImage, TGPImage, Image
 from rich.text import Text
 from model.Etiqueta import Etiqueta
 from model import Cofre
+import win32gui
+import win32ui
+import win32con
+from win32com.shell import shell, shellcon
+from PIL import Image as PilImage
+
 
 class Slider(Widget):
 
@@ -66,8 +72,7 @@ class GerenciadorApp(App):
     caminho_arquivo = caminho
     static_clicado = ""
     valor_slide = 0.5
-    
- 
+
     def resource_path(self, relative_path):
         if hasattr(sys, "_MEIPASS"):
             return os.path.join(sys._MEIPASS, relative_path)
@@ -130,104 +135,106 @@ class GerenciadorApp(App):
                             Center).query_one(antigo).image
                         item.query_one(Center).query_one(antigo).remove()
                         item.query_one(Center).mount(self.Image(conteudo))
+            Cofre.salvar("Render", "render", evento.select.value)
 
     def on_click(self, evento: events.Click):
-        if evento.widget.parent.id == "lst_item" or evento.widget.parent.parent.id == "lst_item" or evento.widget.parent.parent.parent.id == "lst_item":
-            if evento.widget.parent.id == "lst_item":
-                self.static_clicado = evento.widget.query_one(Static).content
-            elif evento.widget.parent.parent.id == "lst_item":
-                self.static_clicado = evento.widget.parent.query_one(
-                    Static).content
-            elif evento.widget.parent.parent.parent.id == "lst_item":
-                self.static_clicado = evento.widget.parent.parent.query_one(
-                    Static).content
-            if evento.chain == 2:
-                if "." not in self.static_clicado:
-                    if self.caminho not in self.caminhos:
-                        self.caminhos.append(self.caminho)
-                    caminho_pasta = self.caminho + f"\\{self.static_clicado}"
-                    self.caminho = caminho_pasta
-                    self.query_one("#campo_caminho").value = self.caminho
-                    self.caminhos.append(caminho_pasta)
-                    self.static_antigo = self.static_clicado
-                    self.carregar_arquivos()
-                else:
-                    os.startfile(self.caminho + f"\\{self.static_clicado}")
-            elif evento.chain > 2:
-                os.startfile(self.caminho + f"\\{self.static_clicado}")
+        widget = evento.widget
+        alvo = None
 
-    def carregar_arquivos(self):
-        list_view = self.query_one("#lst_item", ListView)
-        for child in list_view.children:
-            child.remove()
-        try:
-            self.lista_arquivos = os.listdir(self.caminho)
-        except Exception as e:
-            self.notify("Caminho inválido")
-            print(e)
+        while widget:
+            if hasattr(widget, "id") and widget.id == "lst_item":
+                break
+            widget = widget.parent
+
+        if not widget:
             return
-        carregar_etiquetas = Cofre.carregar("Etiquetas.db", "etiquetas")
-        carregar_caminhos = Cofre.carregar("Etiquetas.db",
-                                           "caminhos",)
-        carregar_caminhos_etiquetas = Cofre.carregar("Etiquetas.db",
-                                                     "caminhos_etiquetas", )
 
-        if carregar_caminhos:
-            self.caminhos = carregar_caminhos
-        if carregar_caminhos_etiquetas:
-            self.caminhos_etiquetas = carregar_caminhos_etiquetas
+        item = evento.widget
+        while item and not isinstance(item, ListItem):
+            item = item.parent
 
-        for arquivo in self.lista_arquivos:
-            if "." not in arquivo:
-                index_arquivo = self.lista_arquivos.index(arquivo)
-                self.lista_arquivos[index_arquivo] = arquivo
+        if not item:
+            return
 
-        if carregar_etiquetas:
-            self.etiquetas = carregar_etiquetas
-            for arquivo in self.lista_arquivos:
-                arquivo_stt = Static(arquivo)
-                for etiqueta_obj in self.etiquetas.values():
-                    if arquivo in etiqueta_obj.arquivos and etiqueta_obj.get_cor():
-                        try:
-                            arquivo_stt.styles.color = etiqueta_obj.get_cor()
-                        except Exception as e:
-                            print(e)
-                            pass
-                        break
-                if "." not in arquivo:
-                    list_view.append(
-                        ListItem(Center(self.Image(self.resource_path(r"assets/folder.png"))), arquivo_stt))
-                elif arquivo.split(".")[-1] in ["jpg", "jpeg", "png", "webpm"]:
-                    list_view.append(
-                        ListItem(Center(self.Image(self.caminho + f"\\{arquivo}")), arquivo_stt))
-                elif arquivo.split(".")[-1] in ["mp4"]:
-                    container = av.open(self.caminho + f"\\{arquivo}")
-                    stream = container.streams.video[0]
-                    frames = container.decode(stream)
-                    preloaded_frames = [frame.to_image() for frame in frames]
-                    thumbnail = preloaded_frames[0]
-                    list_view.append(
-                        ListItem(Center(self.Image(thumbnail)), arquivo_stt))
-                else:
-                    list_view.append(ListItem(arquivo_stt))
+        static = item.query_one(Static)
+        if not static:
+            return
+
+        self.static_clicado = static.content
+        caminho_completo = os.path.join(self.caminho, self.static_clicado)
+
+        if evento.chain == 2:
+            if os.path.isdir(caminho_completo):
+                if self.caminho not in self.caminhos:
+                    self.caminhos.append(self.caminho)
+
+                self.caminho = caminho_completo
+                self.query_one("#campo_caminho").value = self.caminho
+
+                if caminho_completo not in self.caminhos:
+                    self.caminhos.append(caminho_completo)
+
+                self.static_antigo = self.static_clicado
+                self.atualizar()
+            else:
+                try:
+                    os.startfile(caminho_completo)
+                except Exception as e:
+                    print(e)
+
+    def extrair_icone(self, path, size=256):
+        flags = (
+            shellcon.SHGFI_ICON |
+            shellcon.SHGFI_LARGEICON |
+            shellcon.SHGFI_USEFILEATTRIBUTES
+        )
+
+        if os.path.isdir(path):
+            attr = win32con.FILE_ATTRIBUTE_DIRECTORY
         else:
-            for arquivo in self.lista_arquivos:
-                if "." not in arquivo:
-                    list_view.append(
-                        ListItem(Center(self.Image(self.resource_path(r"assets/folder.png"))), Static(arquivo)))
-                elif arquivo.split(".")[-1] in ["jpg", "jpeg", "png", "webpm"]:
-                    list_view.append(
-                        ListItem(Center(self.Image(self.caminho + f"\\{arquivo}")), Static(arquivo)))
-                elif arquivo.split(".")[-1] in ["mp4"]:
-                    container = av.open(self.caminho + f"\\{arquivo}")
-                    stream = container.streams.video[0]
-                    frames = container.decode(stream)
-                    preloaded_frames = [frame.to_image() for frame in frames]
-                    thumbnail = preloaded_frames[0]
-                    list_view.append(
-                        ListItem(Center(self.Image(thumbnail)), Static(arquivo)))
-                else:
-                    list_view.append(ListItem(Static(arquivo)))
+            attr = win32con.FILE_ATTRIBUTE_NORMAL
+
+        ret, info = shell.SHGetFileInfo(path, attr, flags)
+        hicon = info[0]
+
+        if not hicon:
+            return None
+
+        hdc = win32ui.CreateDCFromHandle(win32gui.GetDC(0))
+        hbmp = win32ui.CreateBitmap()
+        hbmp.CreateCompatibleBitmap(hdc, size, size)
+
+        hdc_mem = hdc.CreateCompatibleDC()
+        hdc_mem.SelectObject(hbmp)
+
+        win32gui.DrawIconEx(
+            hdc_mem.GetHandleOutput(),
+            0,
+            0,
+            hicon,
+            size,
+            size,
+            0,
+            None,
+            win32con.DI_NORMAL,
+        )
+
+        bmpinfo = hbmp.GetInfo()
+        bmpstr = hbmp.GetBitmapBits(True)
+
+        img = PilImage.frombuffer(
+            "RGBA",
+            (bmpinfo["bmWidth"], bmpinfo["bmHeight"]),
+            bmpstr,
+            "raw",
+            "BGRA",
+            0,
+            1,
+        )
+
+        win32gui.DestroyIcon(hicon)
+
+        return img
 
     def carregar_etiquetas(self):
         lista_view = self.query_one("#lst_etiqueta", ListView)
@@ -244,7 +251,7 @@ class GerenciadorApp(App):
         if evento.input.id == "campo_caminho":
             self.caminho = evento.input.value
             try:
-                self.carregar_arquivos()
+                self.atualizar()
                 self.caminhos.append(self.caminho)
             except Exception as e:
                 print(e)
@@ -262,9 +269,12 @@ class GerenciadorApp(App):
             return
 
     def on_mount(self):
-        self.carregar_arquivos()
+        self.atualizar()
         self.carregar_etiquetas()
         self.carregar_slide()
+        valor = Cofre.carregar("Render", "render")
+        if valor:
+            self.query_one(Select).value = valor
         if self.caminho not in self.caminhos:
             self.caminhos.append(self.caminho)
 
@@ -282,63 +292,94 @@ class GerenciadorApp(App):
             self.atualizar()
 
     def atualizar(self):
-
         list_view = self.query_one("#lst_item", ListView)
-        list_view.clear()
+        list_view.remove_children()
+
+        lista = self.lista_arquivos
 
         if len(self.arquivos_filtrados) > 0:
-            for arquivo in self.arquivos_filtrados:
-                arquivo_stt = Static(arquivo)
+            lista = self.arquivos_filtrados
+        else:
+            try:
+                self.lista_arquivos = os.listdir(self.caminho)
+            except Exception as e:
+                self.notify("Caminho inválido")
+                print(e)
+                return
+
+            lista = self.lista_arquivos
+
+        carregar_etiquetas = Cofre.carregar("Etiquetas.db", "etiquetas")
+        carregar_caminhos = Cofre.carregar("Etiquetas.db", "caminhos")
+        carregar_caminhos_etiquetas = Cofre.carregar(
+            "Etiquetas.db", "caminhos_etiquetas")
+
+        if carregar_etiquetas:
+            self.etiquetas = carregar_etiquetas
+
+        if carregar_caminhos:
+            self.caminhos = carregar_caminhos
+
+        if carregar_caminhos_etiquetas:
+            self.caminhos_etiquetas = carregar_caminhos_etiquetas
+
+        for arquivo in lista:
+            caminho_completo = os.path.join(self.caminho, arquivo)
+            arquivo_stt = Static(arquivo)
+
+            if self.etiquetas:
                 for etiqueta_obj in self.etiquetas.values():
                     if arquivo in etiqueta_obj.arquivos and etiqueta_obj.get_cor():
                         try:
                             arquivo_stt.styles.color = etiqueta_obj.get_cor()
                         except Exception as e:
                             print(e)
-                            pass
                         break
-                if "." not in arquivo:
-                    list_view.append(
-                        ListItem(Center(self.Image(self.resource_path(r"assets/folder.png"))), arquivo_stt))
-                elif arquivo.split(".")[-1] in ["jpg", "jpeg", "png", "webpm"]:
-                    list_view.append(
-                        ListItem(Center(self.Image(self.caminho + f"\\{arquivo}")), arquivo_stt))
-                elif arquivo.split(".")[-1] in ["mp4"]:
-                    container = av.open(self.caminho + f"\\{arquivo}")
+
+            extensao = arquivo.lower().split(".")[-1] if "." in arquivo else ""
+
+            if extensao in ["jpg", "jpeg", "png", "webp"]:
+                list_view.append(
+                    ListItem(
+                        Center(
+                            self.Image(caminho_completo),
+                            Static(arquivo)
+                        )
+                    )
+                )
+
+            elif extensao in ["mp4"]:
+                try:
+                    container = av.open(caminho_completo)
                     stream = container.streams.video[0]
                     frames = container.decode(stream)
-                    preloaded_frames = [frame.to_image() for frame in frames]
-                    thumbnail = preloaded_frames[0]
+                    first_frame = next(frames)
+                    thumbnail = first_frame.to_image()
+                    container.close()
+
                     list_view.append(
-                        ListItem(Center(self.Image(thumbnail)), arquivo_stt))
-                else:
+                        ListItem(
+                            Center(
+                                self.Image(thumbnail),
+                                Static(arquivo)
+                            )
+                        )
+                    )
+                except Exception as e:
+                    print(e)
                     list_view.append(ListItem(arquivo_stt))
 
-        else:
-            for arquivo in self.lista_arquivos:
-                arquivo_stt = Static(arquivo)
-                for etiqueta_obj in self.etiquetas.values():
-                    if arquivo in etiqueta_obj.arquivos and etiqueta_obj.get_cor():
-                        try:
-                            arquivo_stt.styles.color = etiqueta_obj.get_cor()
-                        except Exception as e:
-                            print(e)
-                            pass
-                        break
-                if "." not in arquivo:
+            else:
+                imagem = self.extrair_icone(caminho_completo)
+                if imagem:
                     list_view.append(
-                        ListItem(Center(self.Image(self.resource_path(r"assets/folder.png"))), arquivo_stt))
-                elif arquivo.split(".")[-1] in ["jpg", "jpeg", "png", "webpm"]:
-                    list_view.append(
-                        ListItem(Center(self.Image(self.caminho + f"\\{arquivo}")), arquivo_stt))
-                elif arquivo.split(".")[-1] in ["mp4"]:
-                    container = av.open(self.caminho + f"\\{arquivo}")
-                    stream = container.streams.video[0]
-                    frames = container.decode(stream)
-                    preloaded_frames = [frame.to_image() for frame in frames]
-                    thumbnail = preloaded_frames[0]
-                    list_view.append(
-                        ListItem(Center(self.Image(thumbnail)), arquivo_stt))
+                        ListItem(
+                            Center(
+                                self.Image(imagem),
+                                Static(arquivo)
+                            )
+                        )
+                    )
                 else:
                     list_view.append(ListItem(arquivo_stt))
 
@@ -372,7 +413,7 @@ class GerenciadorApp(App):
                     self.caminhos.pop()
                     self.caminho = self.caminhos[-1]
                     self.query_one("#campo_caminho").value = self.caminho
-                    self.carregar_arquivos()
+                    self.atualizar()
                 else:
                     self.notify("Sem pasta raiz")
 

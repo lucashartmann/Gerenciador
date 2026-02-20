@@ -1,5 +1,7 @@
 import os
 import av
+import os
+import sys
 from textual.app import App
 from textual.widgets import ListItem, ListView, Static, Button, Input, Select
 from textual.containers import HorizontalGroup, VerticalGroup, Center
@@ -14,7 +16,6 @@ from textual_image.widget import SixelImage, HalfcellImage, TGPImage, Image
 from rich.text import Text
 from model.Etiqueta import Etiqueta
 from model import Cofre
-
 
 class Slider(Widget):
 
@@ -65,6 +66,12 @@ class GerenciadorApp(App):
     caminho_arquivo = caminho
     static_clicado = ""
     valor_slide = 0.5
+    
+ 
+    def resource_path(self, relative_path):
+        if hasattr(sys, "_MEIPASS"):
+            return os.path.join(sys._MEIPASS, relative_path)
+        return os.path.join(os.path.abspath("."), relative_path)
 
     def on_slider_changed(self, evento: Slider.Changed):
         lista = self.query_one("#lst_item")
@@ -189,7 +196,7 @@ class GerenciadorApp(App):
                         break
                 if "." not in arquivo:
                     list_view.append(
-                        ListItem(Center(self.Image(r"assets/folder.png")), arquivo_stt))
+                        ListItem(Center(self.Image(self.resource_path(r"assets/folder.png"))), arquivo_stt))
                 elif arquivo.split(".")[-1] in ["jpg", "jpeg", "png", "webpm"]:
                     list_view.append(
                         ListItem(Center(self.Image(self.caminho + f"\\{arquivo}")), arquivo_stt))
@@ -207,7 +214,7 @@ class GerenciadorApp(App):
             for arquivo in self.lista_arquivos:
                 if "." not in arquivo:
                     list_view.append(
-                        ListItem(Center(self.Image(r"assets/folder.png")), Static(arquivo)))
+                        ListItem(Center(self.Image(self.resource_path(r"assets/folder.png"))), Static(arquivo)))
                 elif arquivo.split(".")[-1] in ["jpg", "jpeg", "png", "webpm"]:
                     list_view.append(
                         ListItem(Center(self.Image(self.caminho + f"\\{arquivo}")), Static(arquivo)))
@@ -292,7 +299,7 @@ class GerenciadorApp(App):
                         break
                 if "." not in arquivo:
                     list_view.append(
-                        ListItem(Center(self.Image(r"assets/folder.png")), arquivo_stt))
+                        ListItem(Center(self.Image(self.resource_path(r"assets/folder.png"))), arquivo_stt))
                 elif arquivo.split(".")[-1] in ["jpg", "jpeg", "png", "webpm"]:
                     list_view.append(
                         ListItem(Center(self.Image(self.caminho + f"\\{arquivo}")), arquivo_stt))
@@ -320,7 +327,7 @@ class GerenciadorApp(App):
                         break
                 if "." not in arquivo:
                     list_view.append(
-                        ListItem(Center(self.Image(r"assets/folder.png")), arquivo_stt))
+                        ListItem(Center(self.Image(self.resource_path(r"assets/folder.png"))), arquivo_stt))
                 elif arquivo.split(".")[-1] in ["jpg", "jpeg", "png", "webpm"]:
                     list_view.append(
                         ListItem(Center(self.Image(self.caminho + f"\\{arquivo}")), arquivo_stt))

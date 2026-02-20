@@ -1,4 +1,4 @@
-name: Build and Release LivrosApp
+name: Build and Release Gerenciador
 
 on:
   push:
@@ -25,12 +25,12 @@ jobs:
           pip install pyinstaller
 
       - name: Build executable with PyInstaller
-        run: pyinstaller --onedir ^
-            --add-data "view/css;view/css" ^
-            --add-data "assets;assets" ^
-            --collect-submodules rich ^
-            --collect-submodules textual ^
-            --name "Gerenciador de Arquivos" ^
+        run: pyinstaller --onedir `
+            --add-data "view/css;view/css" `
+            --add-data "assets;assets" `
+            --collect-submodules rich `
+            --collect-submodules textual `
+            --name "Gerenciador de Arquivos" `
             Main.py
 
       - name: Fazer upload do artefato

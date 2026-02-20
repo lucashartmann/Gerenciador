@@ -63,7 +63,7 @@ Button {
     grid-rows: 37%;
     grid-columns: 20%;
     margin: 1;
-    overflow: scroll scroll;
+    overflow: auto auto;
     align: center middle;
     & > ListItem.-highlight {
                 color: $block-cursor-foreground;

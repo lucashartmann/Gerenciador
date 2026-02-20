@@ -77,6 +77,9 @@ class GerenciadorApp(App):
             lista.styles.grid_rows = f"{valor_rows - 1}%"
             lista.styles.grid_columns = f"{valor_columns - 1}%"
         self.valor_slide = evento.value
+        Cofre.salvar("Slider", "grid_rows", int(lista.styles.grid_rows[0][0]))
+        Cofre.salvar("Slider", "grid_columns", int(
+            lista.styles.grid_columns[0][0]))
 
     def compose(self):
         with HorizontalGroup(id="nav-bar"):
@@ -240,10 +243,23 @@ class GerenciadorApp(App):
                 print(e)
                 return
 
+    def carregar_slide(self):
+        try:
+            grid_rows = Cofre.carregar("Slider", "grid_rows")
+            grid_columns = Cofre.carregar("Slider", "grid_columns")
+            lista = self.query_one("#lst_item")
+            lista.styles.grid_rows = f"{grid_rows}%"
+            lista.styles.grid_columns = f"{grid_columns}%"
+        except Exception as e:
+            print(e)
+            return
+
     def on_mount(self):
         self.carregar_arquivos()
         self.carregar_etiquetas()
-        self.caminhos.append(self.caminho)
+        self.carregar_slide()
+        if self.caminho not in self.caminhos:
+            self.caminhos.append(self.caminho)
 
     def on_input_changed(self, evento: Input.Changed):
         if evento.input.id == "pesquisa":

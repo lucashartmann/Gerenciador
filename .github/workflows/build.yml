@@ -36,5 +36,5 @@ jobs:
       - name: Fazer upload do artefato
         uses: actions/upload-artifact@v4
         with:
-          name: Gerenciador
-          path: dist/Main
+          name: Gerenciador de Arquivos
+          path: dist/Gerenciador de Arquivos

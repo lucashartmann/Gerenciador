@@ -34,10 +34,7 @@ jobs:
             Main.py
 
       - name: Compactar build
-        run: |
-          powershell Compress-Archive `
-            -Path "dist\Gerenciador de Arquivos\*" `
-            -DestinationPath "Gerenciador de Arquivos.zip"
+        run: Compress-Archive -Path "dist\Gerenciador de Arquivos\*" -DestinationPath "Gerenciador.zip"
 
       - name: Upload do artefato
         uses: actions/upload-artifact@v4

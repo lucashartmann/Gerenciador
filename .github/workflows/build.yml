@@ -36,7 +36,7 @@ jobs:
       - name: Compactar build
         run: |
           powershell Compress-Archive `
-            -Path "dist/Gerenciador de Arquivos/*" `
+            -Path "dist\Gerenciador de Arquivos\*" `
             -DestinationPath "Gerenciador de Arquivos.zip"
 
       - name: Upload do artefato

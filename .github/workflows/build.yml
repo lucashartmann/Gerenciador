@@ -33,8 +33,14 @@ jobs:
             --name "Gerenciador de Arquivos" `
             Main.py
 
-      - name: Fazer upload do artefato
+      - name: Compactar build
+        run: |
+          powershell Compress-Archive `
+            -Path "dist/Gerenciador de Arquivos/*" `
+            -DestinationPath "Gerenciador de Arquivos.zip"
+
+      - name: Upload do artefato
         uses: actions/upload-artifact@v4
         with:
           name: Gerenciador de Arquivos
-          path: dist/Gerenciador de Arquivos/*
+          path: Gerenciador de Arquivos.zip

@@ -27,19 +27,13 @@ jobs:
       - name: Build executable with PyInstaller
         run: pyinstaller --onedir `
             --add-data "view/css;view/css" `
-            --add-data "assets;assets" `
             --collect-submodules rich `
             --collect-submodules textual `
             --name "Gerenciador de Arquivos" `
             Main.py
 
-      - name: Compactar build
-        run: |
-          cd dist
-          Compress-Archive -Path "Gerenciador de Arquivos\*" -DestinationPath "..\Gerenciador.zip"
-
       - name: Upload do artefato
         uses: actions/upload-artifact@v4
         with:
           name: Gerenciador
-          path: Gerenciador.zip
+          path: dist/Gerenciador de Arquivos

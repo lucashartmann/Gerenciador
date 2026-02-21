@@ -34,10 +34,12 @@ jobs:
             Main.py
 
       - name: Compactar build
-        run: Compress-Archive -Path "dist\Gerenciador de Arquivos\*" -DestinationPath "Gerenciador.zip"
+        run: |
+          cd dist
+          Compress-Archive -Path "Gerenciador de Arquivos\*" -DestinationPath "..\Gerenciador.zip"
 
       - name: Upload do artefato
         uses: actions/upload-artifact@v4
         with:
-          name: Gerenciador de Arquivos
+          name: Gerenciador
           path: Gerenciador.zip

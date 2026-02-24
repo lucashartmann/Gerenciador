@@ -61,7 +61,7 @@ Button {
     layout: grid;
     grid-size: 5;
     grid-rows: 37%;
-    grid-columns: 20%;
+    grid-columns: 10%;
     margin: 1;
     overflow: auto auto;
     align: center middle;
@@ -138,13 +138,15 @@ ColorPicker {
 
 #lst_item ListItem Image{
     height: 100%;
-    width: 80%;
+    width: 100%;
 }
 
 #lst_item ListItem Static{
-    content-align: center middle;
+    content-align: center middle;   
+    height: auto;
     text-align: center;
     dock: bottom;
+    width: 100%;
 }
 
 #menu_etiquetas #stt_arquivo_selecionado, #stt_etiquetas {

@@ -103,6 +103,8 @@ class GerenciadorApp(App):
             with VerticalGroup(id="menu_etiquetas"):
                 yield Slider()
                 yield Select([("Sixel", "Sixel"), ("Hallfell", "Halfcell"), ("Auto", "Auto"), ("TGP", "TGP")], value="Halfcell", prompt="Image Render", id="slc_render")
+                with Center():
+                    yield Button("Alterar view", id="bt_view")
                 yield Static(f"Selecionado:", id="stt_arquivo_selecionado")
                 yield Input(placeholder="Nome da etiqueta", id="nome")
                 with Center(id="center_color"):
@@ -342,9 +344,9 @@ class GerenciadorApp(App):
                 list_view.append(
                     ListItem(
                         Center(
-                            self.Image(caminho_completo),
-                            Static(arquivo)
-                        )
+                            self.Image(caminho_completo)
+                        ),
+                        Static(arquivo)
                     )
                 )
 
@@ -360,9 +362,9 @@ class GerenciadorApp(App):
                     list_view.append(
                         ListItem(
                             Center(
-                                self.Image(thumbnail),
-                                Static(arquivo)
-                            )
+                                self.Image(thumbnail)
+                            ),
+                            Static(arquivo)
                         )
                     )
                 except Exception as e:
@@ -375,9 +377,9 @@ class GerenciadorApp(App):
                     list_view.append(
                         ListItem(
                             Center(
-                                self.Image(imagem),
-                                Static(arquivo)
-                            )
+                                self.Image(imagem)
+                            ),
+                            Static(arquivo)
                         )
                     )
                 else:
@@ -405,6 +407,46 @@ class GerenciadorApp(App):
 
     def on_button_pressed(self, evento: Button.Pressed):
         match evento.button.id:
+            case "bt_view":
+                lista = self.query_one("#lst_item", ListView)
+                if int(lista.styles.grid_size_columns) > 1:
+                    lista.styles.grid_size_columns = 1
+                    lista.styles.grid_columns = "100%"
+                    for item in lista.children:
+                        item.styles.layout = "horizontal"
+                        
+                        try:
+                            stt = item.query_one(Static)
+                            stt.styles.dock = "none"
+                            stt.styles.height = "100%"
+                        except:
+                            pass
+                        
+                        try:
+                            center = item.query_one(Center)
+                            center.styles.height = "90%"
+                            center.styles.width = "10%"
+                        except:
+                            pass
+                else:
+                    lista.styles.grid_size_columns = 5
+                    lista.styles.grid_columns = "10%"
+                    for item in lista.children:
+                        item.styles.layout = "vertical"
+                        
+                        try:
+                            stt = item.query_one(Static)
+                            stt.styles.dock = "bottom"
+                        except:
+                            pass
+                        
+                        try:
+                            center = item.query_one(Center)
+                            center.styles.height = "90%"
+                            center.styles.width = "100%"
+                        except:
+                            pass
+
             case "bt_voltar":
                 if self.static_clicado == self.static_antigo:
                     if len(self.caminhos) < 2:

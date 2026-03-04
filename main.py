@@ -1,4 +1,4 @@
-from view.App import GerenciadorApp
+from view.app import GerenciadorApp
 
 #pyinstaller  --onedir --add-data "view;view"  Main.py
 

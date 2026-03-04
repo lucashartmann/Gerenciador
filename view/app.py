@@ -14,8 +14,8 @@ from textual.events import MouseDown, MouseMove
 from textual.message import Message
 from textual_image.widget import SixelImage, HalfcellImage, TGPImage, Image
 from rich.text import Text
-from model.Etiqueta import Etiqueta
-from model import Cofre
+from model.etiqueta import Etiqueta
+from model import cofre
 import win32gui
 import win32ui
 import win32con
@@ -57,7 +57,7 @@ class Slider(Widget):
 
 
 class GerenciadorApp(App):
-    CSS_PATH = "css/Gerenciador.tcss"
+    CSS_PATH = "css/gerenciador.tcss"
 
     caminho = f"{os.path.expanduser('~')}\\Downloads"
     Image = HalfcellImage
@@ -89,8 +89,8 @@ class GerenciadorApp(App):
             lista.styles.grid_rows = f"{valor_rows - 1}%"
             lista.styles.grid_columns = f"{valor_columns - 1}%"
         self.valor_slide = evento.value
-        Cofre.salvar("Slider", "grid_rows", int(lista.styles.grid_rows[0][0]))
-        Cofre.salvar("Slider", "grid_columns", int(
+        cofre.salvar("Slider", "grid_rows", int(lista.styles.grid_rows[0][0]))
+        cofre.salvar("Slider", "grid_columns", int(
             lista.styles.grid_columns[0][0]))
 
     def compose(self):
@@ -137,7 +137,7 @@ class GerenciadorApp(App):
                             Center).query_one(antigo).image
                         item.query_one(Center).query_one(antigo).remove()
                         item.query_one(Center).mount(self.Image(conteudo))
-            Cofre.salvar("Render", "render", evento.select.value)
+            cofre.salvar("Render", "render", evento.select.value)
 
     def on_click(self, evento: events.Click):
         widget = evento.widget
@@ -261,8 +261,8 @@ class GerenciadorApp(App):
 
     def carregar_slide(self):
         try:
-            grid_rows = Cofre.carregar("Slider", "grid_rows")
-            grid_columns = Cofre.carregar("Slider", "grid_columns")
+            grid_rows = cofre.carregar("Slider", "grid_rows")
+            grid_columns = cofre.carregar("Slider", "grid_columns")
             lista = self.query_one("#lst_item")
             lista.styles.grid_rows = f"{grid_rows}%"
             lista.styles.grid_columns = f"{grid_columns}%"
@@ -274,7 +274,7 @@ class GerenciadorApp(App):
         self.atualizar()
         self.carregar_etiquetas()
         self.carregar_slide()
-        valor = Cofre.carregar("Render", "render")
+        valor = cofre.carregar("Render", "render")
         if valor:
             self.query_one(Select).value = valor
         if self.caminho not in self.caminhos:
@@ -311,9 +311,9 @@ class GerenciadorApp(App):
 
             lista = self.lista_arquivos
 
-        carregar_etiquetas = Cofre.carregar("Etiquetas.db", "etiquetas")
-        carregar_caminhos = Cofre.carregar("Etiquetas.db", "caminhos")
-        carregar_caminhos_etiquetas = Cofre.carregar(
+        carregar_etiquetas = cofre.carregar("Etiquetas.db", "etiquetas")
+        carregar_caminhos = cofre.carregar("Etiquetas.db", "caminhos")
+        carregar_caminhos_etiquetas = cofre.carregar(
             "Etiquetas.db", "caminhos_etiquetas")
 
         if carregar_etiquetas:
@@ -504,11 +504,11 @@ class GerenciadorApp(App):
                             else:
                                 self.notify("Arquivo já cadastrado")
                         self.carregar_etiquetas()
-                        Cofre.salvar("Etiquetas.db",
+                        cofre.salvar("Etiquetas.db",
                                      "etiquetas", self.etiquetas)
-                        Cofre.salvar("Etiquetas.db",
+                        cofre.salvar("Etiquetas.db",
                                      "caminhos", self.caminhos)
-                        Cofre.salvar("Etiquetas.db",
+                        cofre.salvar("Etiquetas.db",
                                      "caminhos_etiquetas", self.caminhos_etiquetas)
 
                     case "Editar":
@@ -526,11 +526,11 @@ class GerenciadorApp(App):
                                 etiqueta.set_nome(novo_nome)
                             self.carregar_etiquetas()
                             self.atualizar()
-                            Cofre.salvar("Etiquetas.db",
+                            cofre.salvar("Etiquetas.db",
                                          "etiquetas", self.etiquetas)
-                            Cofre.salvar("Etiquetas.db",
+                            cofre.salvar("Etiquetas.db",
                                          "caminhos", self.caminhos)
-                            Cofre.salvar("Etiquetas.db",
+                            cofre.salvar("Etiquetas.db",
                                          "caminhos_etiquetas", self.caminhos_etiquetas)
                         except Exception as e:
                             print(e)
@@ -547,11 +547,11 @@ class GerenciadorApp(App):
                                 statico.remove()
                             self.carregar_etiquetas()
                             self.atualizar()
-                            Cofre.salvar("Etiquetas.db",
+                            cofre.salvar("Etiquetas.db",
                                          "etiquetas", self.etiquetas)
-                            Cofre.salvar("Etiquetas.db",
+                            cofre.salvar("Etiquetas.db",
                                          "caminhos", self.caminhos)
-                            Cofre.salvar("Etiquetas.db",
+                            cofre.salvar("Etiquetas.db",
                                          "caminhos_etiquetas", self.caminhos_etiquetas)
                         except Exception as e:
                             print(e)

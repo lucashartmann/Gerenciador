@@ -30,7 +30,7 @@ jobs:
             --collect-submodules rich `
             --collect-submodules textual `
             --name "Gerenciador de Arquivos" `
-            Main.py
+            main.py
 
       - name: Upload do artefato
         uses: actions/upload-artifact@v4
